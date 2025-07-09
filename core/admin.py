@@ -19,7 +19,7 @@ admin.site.index_title = "Welcome to MPGStone Admin"
 class SocialMediaLinkAdmin(admin.ModelAdmin):
     list_display = ('platform', 'url', 'is_active')
 
-
+ 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('image_tag', 'category_name', 'slug', 'is_active', 'product_count')  # Added product_count
