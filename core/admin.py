@@ -35,3 +35,34 @@ class CategoryAdmin(admin.ModelAdmin):
         return "-"
     image_tag.short_description = 'Image'
 
+
+
+class ProductAttributeInline(admin.TabularInline):
+    model = ProductAttribute
+    extra = 1
+
+class ProductGalleryInline(admin.TabularInline):
+    model = ProductGallery
+    extra = 1
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    inlines = [ProductAttributeInline, ProductGalleryInline]
+    list_display = ('id', 'image_tag', 'name', 'category', 'short_description')  # 👈 Add image_tag here
+    list_display_links = ('image_tag', 'name')  # Make 'id' and 'name' clickable
+    search_fields = ('name', 'description')
+    list_filter = ['category']
+    ordering = ('-id',)
+    list_per_page = 50
+
+    def image_tag(self, obj):
+        if obj.image:  # assuming your model has an ImageField named `image`
+            return format_html('<img src="{}" width="50" height="50" style="object-fit: cover;" />', obj.image.url)
+        return "-"
+    image_tag.short_description = 'Image'  # 👈 This will set the column name to 'Image'
+
+    def short_description(self, obj):
+        # Assuming 'description' is a field in the model and is a string
+        words = obj.description.split()[:20]  # Split the description into words and take the first 20
+        return ' '.join(words)  # Join the words back into a string
+    short_description.short_description = 'Description' 
+
