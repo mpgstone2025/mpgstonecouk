@@ -167,6 +167,7 @@ def product_list_api(request):
             "publisher": product.publisher,
             "attributes": attributes,
             "gallery_images": gallery,
+            "schema_markup" : product.schema_markup,
         })
 
     return JsonResponse(data, safe=False)
@@ -192,6 +193,70 @@ def testimonial_list(request):
     response = {
         "current_time": now().strftime("%Y-%m-%d %H:%M:%S"),
         "testimonials": testimonial_data
+    }
+
+    return JsonResponse(response)
+
+
+def banner_api(request):
+    banners = Banner.objects.all()
+    data = []
+
+    for banner in banners:
+        image_url = request.build_absolute_uri(banner.image.url) if banner.image else None
+
+        data.append({
+            "id": banner.id,
+            "title": banner.title,
+            "subtitle": banner.subtitle,
+            "image": image_url,
+            "alt_text" : banner.alt_text,
+            "enquiry_button_text": banner.enquiry_button_text,
+        })
+
+    return JsonResponse(data, safe=False)
+
+
+def blog_list(request):
+    blogs = Blog.objects.all()
+    blog_data = []
+
+    for blog in blogs:
+        image_url = request.build_absolute_uri(blog.image.url) if blog.image else None
+
+         # Process content to convert <img src="/media/..."> to full URLs
+        soup = BeautifulSoup(blog.content, 'html.parser')
+        for img in soup.find_all('img'):
+            src = img.get('src')
+            if src and src.startswith('/'):
+                img['src'] = request.build_absolute_uri(src)
+
+        blog_data.append({
+            "id": blog.id,
+            "title": blog.title,
+            "slug": blog.slug,
+            "description": blog.description,
+            "content": str(soup),
+            "image": image_url,
+            "alt_text" : blog.alt_text,
+            "meta_title": blog.meta_title,
+            "meta_description": blog.meta_description,
+            "meta_image": request.build_absolute_uri(blog.meta_image.url) if blog.meta_image else None,  # ✅ added
+            "og_title": blog.og_title,
+            "og_decriptions": blog.og_description,
+            "twitter_title": blog.og_title,
+            "twitter_decriptions": blog.og_description,
+            "meta_keywords": blog.meta_keywords,
+            "canonical_url": blog.canonical_url,
+            "robots_tag": blog.robots_tag,
+            "publisher" : blog.publisher,
+            "schema_markup" : blog.schema_markup,
+            "date_posted": blog.date_posted.strftime("%Y-%m-%d %H:%M:%S") if blog.date_posted else None
+        })
+
+    response = {
+        "current_time": now().strftime("%Y-%m-%d %H:%M:%S"),
+        "blogs": blog_data
     }
 
     return JsonResponse(response)

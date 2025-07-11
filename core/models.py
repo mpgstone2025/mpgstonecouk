@@ -1,15 +1,33 @@
 from django.db import models
-# from django.core.validators import FileExtensionValidator
+from django.core.validators import FileExtensionValidator
 from django.utils.text import slugify
 from django.utils.timezone import now
 from ckeditor.fields import RichTextField
-# from ckeditor_uploader.fields import RichTextUploadingField
+from ckeditor_uploader.fields import RichTextUploadingField
 from django.utils.html import format_html
 from django.conf import settings
 from django.urls import reverse
 from django.utils.html import mark_safe
 # Create your models here.
 
+# Start Banner Section Model
+class Banner(models.Model):
+    title = models.CharField(max_length=255, help_text="Main title text for the banner.")
+    subtitle = models.CharField(max_length=255, blank=True, null=True, help_text="Subtitle or supporting text.")
+    image = models.ImageField(
+        upload_to='banners/',
+        validators=[FileExtensionValidator(['jpg', 'jpeg', 'png', 'webp'])],
+        help_text="Upload a banner image (JPG, PNG, WEBP)."
+    )
+    alt_text = models.CharField(max_length=255, blank=True, null=True)
+    enquiry_button_text = models.CharField(max_length=100, default='Enquire Now', help_text="Text shown on the enquiry button..")
+
+    def __str__(self):
+        return self.title or "Banner" 
+    
+# End Banner Section
+
+# Start Socialmedia Section Model
 class SocialMediaLink(models.Model):
     
     platform = models.CharField(max_length=50, choices=[
@@ -28,7 +46,8 @@ class SocialMediaLink(models.Model):
 
     class Meta:
         ordering = ['platform']
-# Category API
+
+# Start Category Model
 class Category(models.Model):
     category_name = models.CharField(max_length=250)
     slug = models.SlugField(max_length=191, unique=True, blank=True)
@@ -81,7 +100,9 @@ class Category(models.Model):
     def __str__(self):
         return self.category_name 
 
+# End Category Model
 
+# Start Product Model
 class Product(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField(max_length=191, unique=True, blank=True, null=True) # example slug field
@@ -103,6 +124,9 @@ class Product(models.Model):
     canonical_url = models.URLField(blank=True, null=True)   
     robots_tag = models.CharField(max_length=255, default="INDEX, FOLLOW, MAX-IMAGE-PREVIEW:LARGE, MAX-SNIPPET:-1, MAX-VIDEO-PREVIEW:-1")
     publisher = models.CharField(max_length=255, blank=True, null=True)  
+
+     # New field for schema markup
+    schema_markup = models.TextField(blank=True, null=True, help_text="Add custom JSON-LD schema here")
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -151,7 +175,9 @@ class ProductAttribute(models.Model):
     def __str__(self):
         return f"{self.title} - {self.product.name}"
     
+# End Product Model
 
+# Start Testimonial Model
 class Testimonial(models.Model):
     name = models.CharField(max_length=255)
     verified = models.BooleanField(default=False)
@@ -162,3 +188,54 @@ class Testimonial(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.title}" 
+    
+
+# End Testimonial model
+
+# Start Blog Model
+class Blog(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    description = models.TextField()
+    content = RichTextUploadingField()  # ✅ Image upload supported
+    image = models.ImageField(upload_to='blog_images/')
+    alt_text = models.CharField(max_length=255, blank=True, null=True)
+    # category = models.ForeignKey(BlogCategory, on_delete=models.CASCADE, related_name='blogs', blank=True)
+    meta_title = models.CharField(max_length=255, help_text="Meta title for SEO", blank=True)
+    meta_description = models.TextField(help_text="Meta description for SEO", blank=True)
+    meta_image = models.ImageField(upload_to='blog_images/meta_image/', blank=True, null=True)
+    og_title = models.CharField(max_length=255, blank=True, null=True)
+    og_description = models.TextField(blank=True, null=True)
+    twitter_title = models.CharField(max_length=255, blank=True, null=True)
+    twitter_description = models.TextField(blank=True, null=True)
+
+    meta_keywords = models.TextField(blank=True, null=True) 
+    canonical_url = models.URLField(blank=True, null=True)   
+    robots_tag = models.CharField(max_length=255, default="INDEX, FOLLOW, MAX-IMAGE-PREVIEW:LARGE, MAX-SNIPPET:-1, MAX-VIDEO-PREVIEW:-1")
+    publisher = models.CharField(max_length=255, blank=True, null=True)  
+    date_posted = models.DateTimeField(default=now)
+    # total_views = models.PositiveIntegerField(default=0)
+
+     # New field for schema markup
+    schema_markup = models.TextField(blank=True, null=True, help_text="Add custom JSON-LD schema here")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+    
+class Comment(models.Model):
+    blog = models.ForeignKey(Blog, on_delete=models.CASCADE, related_name='comments')
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=False)  # Comment moderation
+
+    def __str__(self):
+        return f"Comment by {self.name} on {self.blog.title}"
+    
+# End Blog Model 

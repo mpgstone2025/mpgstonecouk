@@ -15,11 +15,13 @@ admin.site.site_title = "MPGStone Admin Portal"
 admin.site.index_title = "Welcome to MPGStone Admin"
 
 
+# Start Social Media Admin dashboard 
 @admin.register(SocialMediaLink)
 class SocialMediaLinkAdmin(admin.ModelAdmin):
     list_display = ('platform', 'url', 'is_active')
-
+# End Social Media Admin dashboard 
  
+ # Start Category Admin dashboard 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ('image_tag', 'category_name', 'slug', 'is_active', 'product_count')  # Added product_count
@@ -35,8 +37,9 @@ class CategoryAdmin(admin.ModelAdmin):
         return "-"
     image_tag.short_description = 'Image'
 
+ # End Category Admin dashboard 
 
-
+ # Start Product Admin dashboard 
 class ProductAttributeInline(admin.TabularInline):
     model = ProductAttribute
     extra = 1
@@ -67,6 +70,19 @@ class ProductAdmin(admin.ModelAdmin):
     short_description.short_description = 'Description' 
 
 
+@admin.register(ProductReview)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'display_rating', 'created_at', 'is_active')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('name', 'email', 'comment')
+
+    def display_rating(self, obj):
+        return '★' * obj.rating + '☆' * (5 - obj.rating)
+    display_rating.short_description = 'Rating'
+
+# End Product Admin dashboard 
+
+ # Start Testimonials Admin dashboard 
 @admin.register(Testimonial)
 class TestimonialAdmin(admin.ModelAdmin):
     list_display = ('name', 'title', 'verified', 'rating')
@@ -81,3 +97,86 @@ class TestimonialAdmin(admin.ModelAdmin):
         return "No image"
 
     profile_image_preview.short_description = 'Image Preview'
+
+# End Testimonials Admin dashboard 
+
+# Start Banner Admin dashboard 
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ('title', 'subtitle', 'enquiry_button_text')
+    search_fields = ('title', 'subtitle', 'alt_text')
+    list_filter = ('title',)
+    readonly_fields = ()
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                'title',
+                'subtitle',
+                'image',
+                'alt_text',
+                'enquiry_button_text',
+            )
+        }),
+    )
+
+# End Banner Admin dashboard 
+
+
+# Start Blog Admin dashboard 
+
+@admin.register(Blog)
+class BlogAdmin(admin.ModelAdmin):
+    list_display = ('title', 'slug', 'date_posted', 'preview_image', 'meta_title', 'publisher')
+    list_filter = ('date_posted',)
+    search_fields = ('title', 'slug', 'description', 'meta_title', 'meta_description', 'meta_keywords')
+    prepopulated_fields = {'slug': ('title',)}
+    readonly_fields = ('date_posted',)
+    ordering = ('-date_posted',)
+
+    fieldsets = (
+        ('Main Content', {
+            'fields': ('title', 'slug', 'description', 'content', 'image', 'alt_text')
+        }),
+        ('SEO Settings', {
+            'classes': ('collapse',),
+            'fields': (
+                'meta_title', 'meta_description', 'meta_keywords',
+                'canonical_url', 'robots_tag', 'meta_image'
+            )
+        }),
+        ('Open Graph / Twitter Card', {
+            'classes': ('collapse',),
+            'fields': (
+                'og_title', 'og_description',
+                'twitter_title', 'twitter_description',
+            )
+        }),
+        ('Schema Markup (JSON-LD)', {
+            'classes': ('collapse',),
+            'fields': ('schema_markup',),
+        }),
+        ('Metadata', {
+            'fields': ('publisher', 'date_posted')
+        }),
+    )
+
+    def preview_image(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" width="100" height="auto" />', obj.image.url)
+        return "-"
+    preview_image.short_description = 'Image'
+
+
+@admin.register(Comment)
+class BlogCommentAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'blog', 'created_at', 'is_active')
+    list_filter = ('is_active', 'created_at', 'blog')
+    search_fields = ('name', 'email', 'comment')
+    actions = ['approve_comments']
+
+    def approve_comments(self, request, queryset):
+        queryset.update(is_active=True)
+    approve_comments.short_description = "Mark selected comments as active"
+
+# Start Blog Admin dashboard 
