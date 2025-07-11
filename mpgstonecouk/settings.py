@@ -91,17 +91,18 @@ WSGI_APPLICATION = 'mpgstonecouk.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mpgstonecoukdb',
+        'NAME': 'dbmpgstonecouk',
         'USER': 'root',
         'PASSWORD': '',
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
     }
+    
 }
 
 
-DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
-FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+# DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+# FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -167,8 +168,12 @@ CKEDITOR_CONFIGS = {
     'default': {
         'toolbar': 'Custom',
         'toolbar_Custom': [
+            ['Styles', 'Format'],
             ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript'],
+            ['Font', 'FontSize'],
+            ['TextColor', 'BGColor'],
             ['Link', 'Unlink', 'Anchor'],
+            ['Image', 'Table', 'HorizontalRule'],
             ['NumberedList', 'BulletedList'],
             ['Outdent', 'Indent'],
             ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
@@ -177,5 +182,14 @@ CKEDITOR_CONFIGS = {
             ['Source'],
         ],
         'height': 300,
-    },
+        'width': '100%',
+        'extraPlugins': 'uploadimage,image2,font,colorbutton',
+        'filebrowserUploadUrl': '/ckeditor/upload/',
+        'filebrowserBrowseUrl': '/ckeditor/browse/',
+        'removePlugins': 'stylesheetparser',
+        'allowedContent': True,
+
+        # ✅ Force absolute URLs in image `src`
+        'baseHref': 'http://127.0.0.1:8000/',  # 🔄 use your production domain in prod
+    }
 }

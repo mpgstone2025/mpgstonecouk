@@ -66,3 +66,18 @@ class ProductAdmin(admin.ModelAdmin):
         return ' '.join(words)  # Join the words back into a string
     short_description.short_description = 'Description' 
 
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = ('name', 'title', 'verified', 'rating')
+    list_filter = ('verified', 'rating')
+    search_fields = ('name', 'title', 'testimonial')
+    readonly_fields = ('profile_image_preview',)
+    fields = ('name', 'verified', 'profile_image', 'profile_image_preview', 'rating', 'title', 'testimonial')
+    
+    def profile_image_preview(self, obj):
+        if obj.profile_image:
+            return mark_safe(f'<img src="{obj.profile_image.url}" width="100" height="100" style="object-fit:cover; border-radius:8px;" />')
+        return "No image"
+
+    profile_image_preview.short_description = 'Image Preview'

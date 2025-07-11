@@ -28,10 +28,10 @@ class SocialMediaLink(models.Model):
 
     class Meta:
         ordering = ['platform']
-
+# Category API
 class Category(models.Model):
     category_name = models.CharField(max_length=250)
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    slug = models.SlugField(max_length=191, unique=True, blank=True)
     alt_text = models.CharField(max_length=255, blank=True, null=True)
     image = models.ImageField(upload_to='categories/', null=True, blank=True)
     short_description = models.TextField(blank=True, null=True)
@@ -80,11 +80,11 @@ class Category(models.Model):
 
     def __str__(self):
         return self.category_name 
-    
+
 
 class Product(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField(unique=True, blank=True, null=True) # example slug field
+    slug = models.SlugField(max_length=191, unique=True, blank=True, null=True) # example slug field
     category = models.ForeignKey(Category,related_name='product', on_delete= models.CASCADE)
     image = models.ImageField(upload_to='products/')
     alt_text = models.CharField(max_length=255, blank=True, null=True)
@@ -150,3 +150,15 @@ class ProductAttribute(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.product.name}"
+    
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=255)
+    verified = models.BooleanField(default=False)
+    profile_image = models.ImageField(upload_to='testimonials/', blank=True, null=True)
+    rating = models.PositiveIntegerField(default=5)
+    title = models.CharField(max_length=255)
+    testimonial = models.TextField()
+
+    def __str__(self):
+        return f"{self.name} - {self.title}" 
