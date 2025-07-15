@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 # from  core.serializers import ProductSerializer, ProductReviewSerializer
 
 from rest_framework.views import APIView
-# from .serializers import ReviewSerializer, ContactMessageSerializer, ContactDetailSerializer, LegalPageSerializer, HomePageContentSerializer, PageMetaSerializer
+from .serializers import *
 from django.utils.timezone import now
 
 from django.views.decorators.http import require_GET
@@ -24,6 +24,114 @@ from bs4 import BeautifulSoup
 from django.http import JsonResponse
 
 # Create your views here.
+
+
+
+# Show  image browser
+from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.paginator import Paginator
+from django.utils._os import safe_join
+from pathlib import Path
+import mimetypes
+import os
+
+@staff_member_required
+def ckeditor_latest_first(request):
+    """
+    Custom CKEditor browse view that sorts files by last modified (latest first).
+    """
+    media_root = settings.MEDIA_ROOT
+    ck_path = settings.CKEDITOR_UPLOAD_PATH
+    full_path = safe_join(media_root, ck_path)
+
+    files = []
+    path = Path(full_path)
+
+    for file in path.glob("**/*"):
+        if file.is_file():
+            mime_type, _ = mimetypes.guess_type(file.name)
+            if mime_type and mime_type.startswith("image/"):
+                files.append({
+                    'url': settings.MEDIA_URL + ck_path + '/' + file.relative_to(full_path).as_posix(),
+                    'name': file.name,
+                    'mtime': file.stat().st_mtime,
+                })
+
+    # Sort by most recent modification time
+    files.sort(key=lambda x: x['mtime'], reverse=True)
+
+    # Paginate (16 items per page like CKEditor default)
+    paginator = Paginator(files, 16)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(request, 'ckeditor/browse_custom_admin.html', {
+        'files': page_obj,
+        'page_range': paginator.page_range,
+        'page_obj': page_obj,
+        'func_num': request.GET.get("CKEditorFuncNum"),
+    })
+
+
+@csrf_exempt
+def delete_file(request):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            file_name = data.get("file_name")  # Expecting relative path like 'uploads/image.jpg'
+            if not file_name:
+                return JsonResponse({"error": "No file name provided"}, status=400)
+
+            file_path = os.path.join(settings.MEDIA_ROOT, file_name)
+            print("Trying to delete:", file_path)  # ✅ Debug log
+
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                return JsonResponse({"status": "success"})
+            else:
+                return JsonResponse({"error": "File not found."}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request."}, status=400)
+
+
+# def handle_uploaded_file(f):
+#     upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
+#     os.makedirs(upload_dir, exist_ok=True)
+#     save_path = os.path.join(upload_dir, f.name)
+
+#     if os.path.exists(save_path):
+#         raise ValueError("A file with this name already exists.")
+
+#     with open(save_path, 'wb+') as destination:
+#         for chunk in f.chunks():
+#             destination.write(chunk)
+
+def handle_uploaded_file(request):
+    if request.method == 'POST':
+        upload_file = request.FILES.get('file')
+        if not upload_file:
+            return JsonResponse({'error': 'No file uploaded.'}, status=400)
+
+        upload_dir = os.path.join(settings.MEDIA_ROOT, 'uploads')
+        os.makedirs(upload_dir, exist_ok=True)
+        save_path = os.path.join(upload_dir, upload_file.name)
+
+        # Check if file already exists
+        if os.path.exists(save_path):
+            return JsonResponse({'error': 'A file with this name already exists.'}, status=409)
+
+        # Save the file
+        with open(save_path, 'wb+') as destination:
+            for chunk in upload_file.chunks():
+                destination.write(chunk)
+
+        return JsonResponse({'success': True, 'filename': upload_file.name})
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
+# End Browser Image
 
 # Start code This code fetch complte image url
 def make_image_urls_absolute(html_content, request):
@@ -216,7 +324,7 @@ def banner_api(request):
 
     return JsonResponse(data, safe=False)
 
-
+# Start Blog 
 def blog_list(request):
     blogs = Blog.objects.all()
     blog_data = []
@@ -260,3 +368,77 @@ def blog_list(request):
     }
 
     return JsonResponse(response)
+
+
+@api_view(['GET', 'POST'])
+@csrf_exempt
+def blog_comments(request):
+    if request.method == 'GET':
+        blog_id = request.GET.get('blog_id')
+        if blog_id:
+            try:
+                blog_id = int(blog_id)
+                comments = Comment.objects.filter(blog_id=blog_id, is_active=True).values()
+            except ValueError:
+                return JsonResponse({"error": "Invalid blog_id"}, status=400)
+        else:
+            comments = Comment.objects.filter(is_active=True).values()
+        return JsonResponse(list(comments), safe=False)
+
+    elif request.method == 'POST':
+        try:
+            # For application/json
+            if request.content_type == "application/json":
+                data = json.loads(request.body)
+                blog_id = data.get('blog_id')
+                name = data.get('name')
+                email = data.get('email')
+                comment_text = data.get('comment')
+
+            # For form-data or x-www-form-urlencoded
+            else:
+                blog_id = request.POST.get('blog_id')
+                name = request.POST.get('name')
+                email = request.POST.get('email')
+                comment_text = request.POST.get('comment')
+
+            if not all([blog_id, name, email, comment_text]):
+                return JsonResponse({"error": "Missing required fields"}, status=400)
+
+            comment = Comment.objects.create(
+                blog_id=blog_id,
+                name=name,
+                email=email,
+                comment=comment_text,
+                created_at=timezone.now()
+            )
+
+            return JsonResponse({"success": True, "comment_id": comment.id}, status=201)
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+        
+# End Blog
+
+
+# Start About Page Get APi
+@api_view(['GET'])
+def get_about_us(request):
+    try:
+        about = AboutUs.objects.first()
+        serializer = AboutUsSerializer(about, context={'request': request})
+        return Response(serializer.data)
+    except:
+        return Response({"error": "About Us content not found."}, status=404)
+    
+# End About Page
+
+
+# Start Product Catalogues
+@api_view(['GET'])
+def product_catalogue_list(request):
+    catalogues = ProductCatalogue.objects.all()
+    serializer = ProductCatalogueSerializer(catalogues, many=True, context={'request': request})
+    return Response(serializer.data)
+
+# End Product Catalogues

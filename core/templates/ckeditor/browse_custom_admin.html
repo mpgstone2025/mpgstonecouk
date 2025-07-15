@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CKEditor File Browser</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .thumb {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+            width: 120px;
+            position: relative;
+        }
+
+        .thumb img {
+            width: 100px;
+            height: auto;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .thumb img:hover {
+            border-color: #888;
+            box-shadow: 0 0 5px rgba(0,0,0,0.2);
+        }
+
+        .thumb p {
+            font-size: 12px;
+            word-wrap: break-word;
+            margin-top: 5px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            line-height: 18px;
+        }
+
+        .pagination {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .pagination a, .pagination strong {
+            display: inline-block;
+            padding: 8px 12px;
+            margin: 0 3px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .pagination a:hover {
+            background-color: #f0f0f0;
+        }
+
+        .pagination strong {
+            background-color: #007BFF;
+            color: white;
+            border-color: #007BFF;
+        }
+    </style>
+
+    <script>
+        function selectFile(url) {
+            const funcNum = {{ func_num|safe }};
+            window.opener.CKEDITOR.tools.callFunction(funcNum, url);
+            window.close();
+        }
+
+        function deleteFile(fileName, element) {
+            if (confirm(`Are you sure you want to delete "${fileName}"?`)) {
+                fetch("{% url 'delete_file' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ file_name: fileName })
+                }).then(response => {
+                    if (response.ok) {
+                        element.parentElement.remove();
+                    } else {
+                        alert("Error deleting file.");
+                    }
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Browse Latest Images</h2>
+
+    {% for file in files %}
+        <div class="thumb">
+            <button class="delete-btn" onclick="deleteFile('{{ file.name }}', this)">×</button>
+            <img src="{{ file.url }}" onclick="selectFile('{{ file.url }}')" alt="{{ file.name }}">
+            <p>{{ file.name }}</p>
+        </div>
+    {% empty %}
+        <p>No images found.</p>
+    {% endfor %}
+
+    {% if page_range %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page=1&CKEditorFuncNum={{ func_num }}">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}&CKEditorFuncNum={{ func_num }}">&lsaquo; Prev</a>
+            {% endif %}
+
+            {% for i in page_range %}
+                {% if i == page_obj.number %}
+                    <strong>{{ i }}</strong>
+                {% else %}
+                    <a href="?page={{ i }}&CKEditorFuncNum={{ func_num }}">{{ i }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&CKEditorFuncNum={{ func_num }}">Next &rsaquo;</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}&CKEditorFuncNum={{ func_num }}">Last &raquo;</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</body>
+</html>

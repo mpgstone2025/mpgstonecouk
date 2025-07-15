@@ -179,4 +179,24 @@ class BlogCommentAdmin(admin.ModelAdmin):
         queryset.update(is_active=True)
     approve_comments.short_description = "Mark selected comments as active"
 
-# Start Blog Admin dashboard 
+# End Blog Admin dashboard 
+
+# Start About Page Admin dashboard 
+@admin.register(AboutUs)
+class AboutUsAdmin(admin.ModelAdmin):
+    list_display = ('title',)
+# End
+
+# Start Product Catalogues
+@admin.register(ProductCatalogue)
+class ProductCatalogueAdmin(admin.ModelAdmin):
+    list_display = ('name', 'thumbnail_tag', 'pdf_link')
+    readonly_fields = ('thumbnail_tag', 'pdf_link')
+# End
+
+# Start Legal Page
+@admin.register(LegalstaticPage)
+class StaticPageAdmin(admin.ModelAdmin):
+    list_display = ('page_type', 'title')
+    search_fields = ('title', 'page_type')
+

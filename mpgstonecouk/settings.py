@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework',
+    'tinymce'
     
 ]
 
@@ -186,7 +187,8 @@ CKEDITOR_CONFIGS = {
         'width': '100%',
         'extraPlugins': 'uploadimage,image2,font,colorbutton',
         'filebrowserUploadUrl': '/ckeditor/upload/',
-        'filebrowserBrowseUrl': '/ckeditor/browse/',
+        # 'filebrowserBrowseUrl': '/ckeditor/browse/',
+        'filebrowserBrowseUrl': '/ckeditor/custom-browse/',  # override default
         'removePlugins': 'stylesheetparser',
         'allowedContent': True,
 
@@ -194,3 +196,5 @@ CKEDITOR_CONFIGS = {
         'baseHref': 'http://127.0.0.1:8000/',  # 🔄 use your production domain in prod
     }
 }
+
+

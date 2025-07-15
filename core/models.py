@@ -8,6 +8,8 @@ from django.utils.html import format_html
 from django.conf import settings
 from django.urls import reverse
 from django.utils.html import mark_safe
+
+from tinymce.models import HTMLField
 # Create your models here.
 
 # Start Banner Section Model
@@ -239,3 +241,119 @@ class Comment(models.Model):
         return f"Comment by {self.name} on {self.blog.title}"
     
 # End Blog Model 
+
+
+
+from django.db import models
+
+# Start About Page
+class AboutUs(models.Model):
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+
+    image_1 = models.ImageField(upload_to='about/', null=True, blank=True)
+    image_1_alt = models.CharField(max_length=255, blank=True, help_text="Alt text for image 1")
+
+    image_2 = models.ImageField(upload_to='about/', null=True, blank=True)
+    image_2_alt = models.CharField(max_length=255, blank=True, help_text="Alt text for image 2")
+
+    image_3 = models.ImageField(upload_to='about/', null=True, blank=True)
+    image_3_alt = models.CharField(max_length=255, blank=True, help_text="Alt text for image 3")
+
+    image_4 = models.ImageField(upload_to='about/', null=True, blank=True)
+    image_4_alt = models.CharField(max_length=255, blank=True, help_text="Alt text for image 4")
+
+    image_5 = models.ImageField(upload_to='about/', null=True, blank=True)
+    image_5_alt = models.CharField(max_length=255, blank=True, help_text="Alt text for image 5")
+
+    
+    mission = models.TextField()
+    mission_image = models.ImageField(upload_to='about/', null=True, blank=True)
+    mission_image_alt = models.CharField(max_length=255, blank=True)
+
+    vision = models.TextField()
+    vision_image = models.ImageField(upload_to='about/', null=True, blank=True)
+    vision_image_alt = models.CharField(max_length=255, blank=True)
+
+    values = models.TextField()
+    values_image = models.ImageField(upload_to='about/', null=True, blank=True)
+    values_image_alt = models.CharField(max_length=255, blank=True)
+
+    philosophy = models.TextField()
+    philosophy_image = models.ImageField(upload_to='about/', null=True, blank=True)
+    philosophy_image_alt = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return self.title
+
+    def __str__(self):
+        return self.title
+
+# End About Page
+
+# Start Product Catalogues
+class ProductCatalogue(models.Model):
+    name = models.CharField(max_length=255)
+    thumbnail = models.ImageField(upload_to='catalogue_thumbnails/')
+    pdf_file = models.FileField(upload_to='catalogue_pdfs/')
+
+    def __str__(self):
+        return self.name
+
+    def thumbnail_tag(self):
+        if self.thumbnail:
+            return format_html('<img src="{}" width="100" height="auto" />', self.thumbnail.url)
+        return "(No image)"
+
+    def pdf_link(self):
+        if self.pdf_file:
+            return format_html('<a href="{}" target="_blank">Download PDF</a>', self.pdf_file.url)
+        return "(No file)"
+
+    thumbnail_tag.short_description = "Thumbnail"
+    pdf_link.short_description = "PDF File"
+
+# End Product Catalogues
+
+
+# Start Legal Pages
+class LegalstaticPage(models.Model):
+    PAGE_CHOICES = [
+        ('terms', 'Terms & Conditions'),
+        ('privacy', 'Privacy Policy'),
+        ('cookies', 'Cookies Policy'),
+    ]
+
+    page_type = models.CharField(max_length=50, choices=PAGE_CHOICES, unique=True)
+    title = models.CharField(max_length=255)
+    content = RichTextUploadingField()
+
+    def __str__(self):
+        return self.get_page_type_display()
+    
+# End Legal Page
+
+# Start Home page relate SEO Field
+
+# class HomePageContent(models.Model):
+#     title = models.CharField(max_length=255)
+#     content = RichTextUploadingField()
+#     # SEO fields
+#     meta_title = models.CharField(max_length=255, blank=True, null=True)
+#     meta_description = models.TextField(blank=True, null=True)
+#     meta_image = models.ImageField(upload_to='homepage/meta_images/', blank=True, null=True)
+#     og_title = models.CharField(max_length=255, blank=True, null=True)
+#     og_description = models.TextField(blank=True, null=True)
+#     twitter_title = models.CharField(max_length=255, blank=True, null=True)
+#     twitter_description = models.TextField(blank=True, null=True)
+
+#     meta_keywords = models.TextField(blank=True, null=True) 
+#     canonical_url = models.URLField(blank=True, null=True)   
+#     robots_tag = models.CharField(max_length=255, default="INDEX, FOLLOW, MAX-IMAGE-PREVIEW:LARGE, MAX-SNIPPET:-1, MAX-VIDEO-PREVIEW:-1")
+#     publisher = models.CharField(max_length=255, blank=True, null=True)  
+
+#     schemas = models.ManyToManyField(SchemaBlock, blank=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     def __str__(self):
+#         return self.title
