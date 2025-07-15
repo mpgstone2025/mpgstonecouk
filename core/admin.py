@@ -200,3 +200,49 @@ class StaticPageAdmin(admin.ModelAdmin):
     list_display = ('page_type', 'title')
     search_fields = ('title', 'page_type')
 
+
+# End
+
+# Start Home page admin
+@admin.register(HomePageContent)
+class HomePageContentAdmin(admin.ModelAdmin):
+    list_display = ['title', 'updated_at']
+    readonly_fields = ['updated_at']
+    fieldsets = (
+        ("Main Content", {
+            'fields': ('title', 'content')
+        }),
+        ("SEO", {
+            'fields': (
+                'meta_title', 'meta_description', 'meta_image',
+                'og_title', 'og_description',
+                'twitter_title', 'twitter_description',
+                'meta_keywords', 'canonical_url', 'robots_tag', 'publisher'
+            )
+        }),
+        ("Schema", {
+            'fields': ('schema_markup',)
+        }),
+        ("Headline Section", {
+            'fields': ('main_heading', 'description_paragraph')
+        }),
+        ("Icons Section", {
+            'fields': (
+                ('icon1_image', 'icon1_alt', 'icon1_heading', 'icon1_subtext'),
+                ('icon2_image', 'icon2_alt', 'icon2_heading', 'icon2_subtext'),
+                ('icon3_image', 'icon3_alt', 'icon3_heading', 'icon3_subtext'),
+                ('icon4_image', 'icon4_alt', 'icon4_heading', 'icon4_subtext'),
+            )
+        }),
+        ("About Section (Text + Media)", {
+            'fields': (
+                'subtitle', 'about_description',
+                'about_image', 'about_image_alt_text',
+                'video_url'
+            )
+        }),
+        ("Timestamp", {
+            'fields': ('updated_at',)
+        }),
+    )
+# End

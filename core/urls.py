@@ -15,5 +15,6 @@ urlpatterns = [
     path('api/blogs/', views.blog_list, name="blog_list"),
     path('api/comments/', views.blog_comments, name="blog_comment"),
     path('api/catalogues/', views.product_catalogue_list, name='product_catalogue_list'),
+    path('api/homepage-content/', views.get_homepage_content, name='homepage-content'),
 
 ]

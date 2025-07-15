@@ -442,3 +442,68 @@ def product_catalogue_list(request):
     return Response(serializer.data)
 
 # End Product Catalogues
+
+# Start Home Page Content
+def get_homepage_content(request):
+    try:
+        homepage = HomePageContent.objects.latest('updated_at')
+        data = {
+            "title": homepage.title,
+            "content": homepage.content,
+            "meta_title": homepage.meta_title,
+            "meta_description": homepage.meta_description,
+            "meta_image": request.build_absolute_uri(homepage.meta_image.url) if homepage.meta_image else None,
+            "og_title": homepage.og_title,
+            "og_description": homepage.og_description,
+            "twitter_title": homepage.twitter_title,
+            "twitter_description": homepage.twitter_description,
+            "meta_keywords": homepage.meta_keywords,
+            "canonical_url": homepage.canonical_url,
+            "robots_tag": homepage.robots_tag,
+            "publisher": homepage.publisher,
+            "schema_markup": homepage.schema_markup,
+
+            "main_heading": homepage.main_heading,
+            "description_paragraph": homepage.description_paragraph,
+
+            "icons": [
+                {
+                    "image": request.build_absolute_uri(homepage.icon1_image.url) if homepage.icon1_image else None,
+                    "alt": homepage.icon1_alt,
+                    "heading": homepage.icon1_heading,
+                    "subtext": homepage.icon1_subtext,
+                },
+                {
+                    "image": request.build_absolute_uri(homepage.icon2_image.url) if homepage.icon2_image else None,
+                    "alt": homepage.icon2_alt,
+                    "heading": homepage.icon2_heading,
+                    "subtext": homepage.icon2_subtext,
+                },
+                {
+                    "image": request.build_absolute_uri(homepage.icon3_image.url) if homepage.icon3_image else None,
+                    "alt": homepage.icon3_alt,
+                    "heading": homepage.icon3_heading,
+                    "subtext": homepage.icon3_subtext,
+                },
+                {
+                    "image": request.build_absolute_uri(homepage.icon4_image.url) if homepage.icon4_image else None,
+                    "alt": homepage.icon4_alt,
+                    "heading": homepage.icon4_heading,
+                    "subtext": homepage.icon4_subtext,
+                },
+            ],
+
+            # ✅ About Section block
+            "about_section": {
+                "subtitle": homepage.subtitle,
+                "description": homepage.about_description,
+                "image": request.build_absolute_uri(homepage.about_image.url) if homepage.about_image else None,
+                "image_alt_text": homepage.about_image_alt_text,
+                "video_url": homepage.video_url,
+            },
+
+            "updated_at": homepage.updated_at,
+        }
+        return JsonResponse(data)
+    except HomePageContent.DoesNotExist:
+        return JsonResponse({"error": "Homepage content not found."}, status=404)

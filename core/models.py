@@ -335,25 +335,111 @@ class LegalstaticPage(models.Model):
 
 # Start Home page relate SEO Field
 
-# class HomePageContent(models.Model):
-#     title = models.CharField(max_length=255)
-#     content = RichTextUploadingField()
-#     # SEO fields
-#     meta_title = models.CharField(max_length=255, blank=True, null=True)
-#     meta_description = models.TextField(blank=True, null=True)
-#     meta_image = models.ImageField(upload_to='homepage/meta_images/', blank=True, null=True)
-#     og_title = models.CharField(max_length=255, blank=True, null=True)
-#     og_description = models.TextField(blank=True, null=True)
-#     twitter_title = models.CharField(max_length=255, blank=True, null=True)
-#     twitter_description = models.TextField(blank=True, null=True)
+class HomePageContent(models.Model):
+    # Existing fields
+    title = models.CharField(max_length=255)
+    content = RichTextUploadingField()
 
-#     meta_keywords = models.TextField(blank=True, null=True) 
-#     canonical_url = models.URLField(blank=True, null=True)   
-#     robots_tag = models.CharField(max_length=255, default="INDEX, FOLLOW, MAX-IMAGE-PREVIEW:LARGE, MAX-SNIPPET:-1, MAX-VIDEO-PREVIEW:-1")
-#     publisher = models.CharField(max_length=255, blank=True, null=True)  
+    # SEO fields
+    meta_title = models.CharField(max_length=255, blank=True, null=True)
+    meta_description = models.TextField(blank=True, null=True)
+    meta_image = models.ImageField(upload_to='homepage/meta_images/', blank=True, null=True)
+    og_title = models.CharField(max_length=255, blank=True, null=True)
+    og_description = models.TextField(blank=True, null=True)
+    twitter_title = models.CharField(max_length=255, blank=True, null=True)
+    twitter_description = models.TextField(blank=True, null=True)
+    meta_keywords = models.TextField(blank=True, null=True)
+    canonical_url = models.URLField(blank=True, null=True)
+    robots_tag = models.CharField(
+        max_length=255,
+        default="INDEX, FOLLOW, MAX-IMAGE-PREVIEW:LARGE, MAX-SNIPPET:-1, MAX-VIDEO-PREVIEW:-1"
+    )
+    publisher = models.CharField(max_length=255, blank=True, null=True)
 
-#     schemas = models.ManyToManyField(SchemaBlock, blank=True)
-#     updated_at = models.DateTimeField(auto_now=True)
+    # Schema markup
+    schema_markup = models.TextField(blank=True, null=True, help_text="Add custom JSON-LD schema here")
 
-#     def __str__(self):
-#         return self.title
+    # ✅ New Fields
+    main_heading = models.CharField(max_length=255, blank=True, null=True)
+    description_paragraph = models.TextField(blank=True, null=True)
+
+    icon1_image = models.ImageField(upload_to='homepage/icons/', blank=True, null=True)
+    icon1_alt = models.CharField(max_length=255, blank=True, null=True)
+    icon1_heading = models.CharField(max_length=255, blank=True, null=True)
+    icon1_subtext = models.CharField(max_length=255, blank=True, null=True)
+
+    icon2_image = models.ImageField(upload_to='homepage/icons/', blank=True, null=True)
+    icon2_alt = models.CharField(max_length=255, blank=True, null=True)
+    icon2_heading = models.CharField(max_length=255, blank=True, null=True)
+    icon2_subtext = models.CharField(max_length=255, blank=True, null=True)
+
+    icon3_image = models.ImageField(upload_to='homepage/icons/', blank=True, null=True)
+    icon3_alt = models.CharField(max_length=255, blank=True, null=True)
+    icon3_heading = models.CharField(max_length=255, blank=True, null=True)
+    icon3_subtext = models.CharField(max_length=255, blank=True, null=True)
+
+    icon4_image = models.ImageField(upload_to='homepage/icons/', blank=True, null=True)
+    icon4_alt = models.CharField(max_length=255, blank=True, null=True)
+    icon4_heading = models.CharField(max_length=255, blank=True, null=True)
+    icon4_subtext = models.CharField(max_length=255, blank=True, null=True)
+
+    # About Section Block (Text + Image + Video)
+    subtitle = models.CharField(max_length=255, blank=True, null=True)
+    about_description = RichTextUploadingField(blank=True, null=True)
+
+    about_image = models.ImageField(upload_to='about_section/images/', blank=True, null=True)
+    about_image_alt_text = models.CharField(max_length=255, blank=True, null=True)
+
+    video_url = models.URLField(blank=True, null=True, help_text="Paste a YouTube or .mp4 URL")
+
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.title
+    
+# End
+
+# Create Pages SEO Realeted Mode
+
+class PageMeta(models.Model):
+    PAGE_CHOICES = [
+        ('products', 'Products'),
+        ('about', 'About Us'),
+        ('contact', 'Contact Us'),
+        ('terms', 'Terms & Conditions'),
+        ('privacy', 'Privacy Policy'),
+        ('catalogue', 'Product Catalogue'),
+        ('category', 'Category'),
+        ('blogs', 'Blogs'),
+    ]
+
+    page = models.CharField(max_length=50, choices=PAGE_CHOICES, unique=True)
+    
+    # Meta tags
+    meta_title = models.CharField(max_length=255, blank=True, null=True)
+    meta_description = models.TextField(blank=True, null=True)
+    meta_keywords = models.TextField(blank=True, null=True)
+    meta_image = models.ImageField(upload_to='pages/meta_images/', blank=True, null=True)
+    # Open Graph
+    og_title = models.CharField(max_length=255, blank=True, null=True)
+    og_description = models.TextField(blank=True, null=True)
+
+    # Twitter
+    twitter_title = models.CharField(max_length=255, blank=True, null=True)
+    twitter_description = models.TextField(blank=True, null=True)
+
+    # SEO & Robots
+    meta_keywords = models.TextField(blank=True, null=True)
+    canonical_url = models.URLField(blank=True, null=True)
+    robots_tag = models.CharField(
+        max_length=255,
+        default="INDEX, FOLLOW, MAX-IMAGE-PREVIEW:LARGE, MAX-SNIPPET:-1, MAX-VIDEO-PREVIEW:-1"
+    )
+
+    # Optional
+    publisher = models.CharField(max_length=255, blank=True, null=True)
+
+    def __str__(self):
+        return dict(self.PAGE_CHOICES).get(self.page, self.page)
+    
+# End

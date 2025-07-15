@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
+    'core', # mpgstone.co.uk website app
+    'mpgsurfaces', # mpgsurfaces.com website app
     'corsheaders',
     'ckeditor',
     'ckeditor_uploader',
@@ -98,13 +99,21 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
         'PORT': '3306',
+    },
+    'mpgsurface_db' :{
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'mpgsurface_db',
+        'USER': 'root',
+        'PASSWORD': '',
+        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'PORT': '3306',
     }
     
 }
+DATABASE_ROUTERS = ['multi_store_project.db_routers.MPGSurfacesRouter']
 
-
-# DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
-# FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
