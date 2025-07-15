@@ -13,6 +13,9 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from decouple import config
+
+SECRET_KEY = config('SECRET_KEY')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,12 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--32o5oq5!2z)qhf3yw#fwp%@5d!lo8-1h9-+o!$b$)p-virq5u'
+# SECRET_KEY = 'django-insecure--32o5oq5!2z)qhf3yw#fwp%@5d!lo8-1h9-+o!$b$)p-virq5u'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
 SITE_DOMAIN = "http://127.0.0.1:8000"  # For local development
 
@@ -41,7 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core', # mpgstone.co.uk website app
-    'mpgsurfaces', # mpgsurfaces.com website app
+    'mpgsurfacesapp', # mpgsurfaces.com website app
     'corsheaders',
     'ckeditor',
     'ckeditor_uploader',
@@ -94,23 +97,24 @@ WSGI_APPLICATION = 'mpgstonecouk.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mpgstonecoukdb',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': 'localhost',
         'PORT': '3306',
     },
-    'mpgsurface_db' :{
+    'mpgsurface_db': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'mpgsurface_db',
-        'USER': 'root',
-        'PASSWORD': '',
-        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+        'NAME': config('MPGS_DB_NAME'),
+        'USER': config('MPGS_DB_USER'),
+        'PASSWORD': config('MPGS_DB_PASSWORD'),
+        'HOST': 'localhost',
         'PORT': '3306',
-    }
-    
+    },
 }
-DATABASE_ROUTERS = ['multi_store_project.db_routers.MPGSurfacesRouter']
+
+DATABASE_ROUTERS = ['mpgstonecouk.db_routers.MPGSurfacesRouter']
+
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 524288000  # 500 MB

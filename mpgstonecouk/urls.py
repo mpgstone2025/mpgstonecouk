@@ -24,6 +24,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('tinymce/', include('tinymce.urls')),
+    path('mpgsurfaces/', include('mpgsurfacesapp.urls')),  # Update to real app name
     
 ]
 
